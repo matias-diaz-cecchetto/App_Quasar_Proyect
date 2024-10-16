@@ -5,3 +5,6 @@
 /node_modules
 .eslintrc.cjs
 /quasar.config.*.temporary.compiled*
+# Ignorar archivos PDF.js
+/public/pdfjs/build/pdf.js
+/public/pdfjs/web/viewer.js
