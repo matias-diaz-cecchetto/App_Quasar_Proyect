@@ -5,40 +5,16 @@
 
     <div class="row justify-center q-ma-md">
       <div style="display: flex; max-width: 100%; width: 100%">
-        <q-calendar-month
-          ref="calendarRef"
-          :locale="locale"
-          v-model="selectedDate"
-          animated
-          bordered
-          focusable
-          hoverable
-          no-active-date
-          :day-min-height="130"
-          :day-height="0"
-          @change="onChange"
-          @moved="onMoved"
-          @click-date="onClickDate"
-          @click-day="onClickDay"
-          @click-workweek="onClickWorkweek"
-          @click-head-workweek="onClickHeadWorkweek"
-          @click-head-day="onClickHeadDay"
-        >
+        <q-calendar-month ref="calendarRef" :locale="locale" v-model="selectedDate" animated bordered focusable
+          hoverable no-active-date :day-min-height="130" :day-height="0" @change="onChange" @moved="onMoved"
+          @click-date="onClickDate" @click-day="onClickDay" @click-workweek="onClickWorkweek"
+          @click-head-workweek="onClickHeadWorkweek" @click-head-day="onClickHeadDay">
           <template #day="{ scope: { timestamp } }">
-            <template
-              v-if="
-                eventsMap[timestamp.date] && eventsMap[timestamp.date].length
-              "
-            >
-              <template
-                v-for="event in eventsMap[timestamp.date]"
-                :key="event.id"
-              >
-                <div
-                  :class="badgeClasses(event, 'day')"
-                  :style="badgeStyles(event, 'day')"
-                  class="my-event"
-                >
+            <template v-if="
+              eventsMap[timestamp.date] && eventsMap[timestamp.date].length
+            ">
+              <template v-for="event in eventsMap[timestamp.date]" :key="event.id">
+                <div :class="badgeClasses(event, 'day')" :style="badgeStyles(event, 'day')" class="my-event">
                   <div class="title q-calendar__ellipsis">
                     {{ event.title + (event.time ? " - " + event.time : "") }}
                     <q-tooltip>{{ event.details }}</q-tooltip>
