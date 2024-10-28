@@ -5,9 +5,9 @@
 
     <div class="row justify-center q-ma-md">
       <div style="display: flex; max-width: 100%; width: 100%">
-        <q-calendar-month ref="calendarRef" :locale="locale" v-model="selectedDate" animated bordered focusable
-          hoverable no-active-date :day-min-height="130" :day-height="0" @change="onChange" @moved="onMoved"
-          @click-date="onClickDate" @click-day="onClickDay" @click-workweek="onClickWorkweek"
+        <q-calendar-month ref="calendarRef" :locale="locale" v-model="selectedDate" :events="reactiveEvents" animated
+          bordered focusable hoverable no-active-date :day-min-height="130" :day-height="0" @change="onChange"
+          @moved="onMoved" @click-date="onClickDate" @click-day="onClickDay" @click-workweek="onClickWorkweek"
           @click-head-workweek="onClickHeadWorkweek" @click-head-day="onClickHeadDay">
           <template #day="{ scope: { timestamp } }">
             <template v-if="
@@ -15,7 +15,7 @@
             ">
               <template v-for="event in eventsMap[timestamp.date]" :key="event.id">
                 <div :class="badgeClasses(event, 'day')" :style="badgeStyles(event, 'day')" class="my-event">
-                  <div class="title q-calendar__ellipsis">
+                  <div class="title q-calendar__ellipsis" @click="onClickEvent(event)">
                     {{ event.title + (event.time ? " - " + event.time : "") }}
                     <q-tooltip>{{ event.details }}</q-tooltip>
                   </div>
@@ -38,14 +38,65 @@
     <q-dialog v-model="dialogVisible">
       <q-card>
         <q-card-section>
-          <div class="text-h6">{{ selectedEvent.title }}</div>
-          <div>{{ selectedEvent.details }}</div>
+          <div class="text-h6">Eventos para {{ selectedDateDialog }}</div>
+          <q-list>
+            <q-item v-for="event in eventsForSelectedDate" :key="event.id">
+              <q-item-section>
+                <div class="text-bold">{{ event.title }}</div>
+                <div>{{ event.details }}</div>
+                <div v-if="event.time">Hora: {{ event.time }}</div>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </q-card-section>
         <q-card-actions>
           <q-btn flat label="Cerrar" @click="dialogVisible = false" />
+          <q-btn flat label="Nuevo Evento" color="blue" @click="newEvent" />
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="isNewEvent">
+      <q-card style="width: 900px">
+        <q-card-section>
+          <div class="text-h6 q-ma-md">Nuevo evento para {{ selectedDateDialog }}</div>
+          <q-list>
+            <q-item>
+              <q-item-section>
+                <div class="q-pa-md">
+
+                  <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+
+                    <q-input filled v-model="formEvent.title" label="Titulo *" hint="Titulo" lazy-rules
+                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+
+                    <q-input filled v-model="formEvent.details" label="Detalle *" hint="Detalle" lazy-rules
+                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+
+                    <q-input filled v-model="formEvent.time" label="Horario *" hint="Horario" lazy-rules
+                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+
+                    <q-input filled v-model="formEvent.duration" label="Tiempo *" hint="Tiempo" lazy-rules
+                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+
+                    <q-input filled v-model="formEvent.bgcolor" label="Color *" hint="Color" lazy-rules
+                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+
+                    <q-card-actions class="q-mt-md">
+                      <q-btn flat label="Submit" type="submit" color="primary" />
+                      <q-btn flat label="cancelar" @click="dialogVisible = false; isNewEvent = false" />
+                    </q-card-actions>
+
+                  </q-form>
+
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -60,7 +111,7 @@ import {
 import "@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 // Variables reactivas
 const calendarRef = ref(null);
@@ -68,6 +119,17 @@ const selectedDate = ref(today());
 const locale = ref("es-AR");
 const dialogVisible = ref(false);
 const selectedEvent = ref({});
+const eventsForSelectedDate = ref([]);
+const selectedDateDialog = ref("");
+const isNewEvent = ref(false)
+const formEvent = ref({
+  title: '',
+  details: '',
+  time: '',
+  duration: '',
+  date: '',
+  bgcolor: ''
+})
 
 // Función para obtener el día actual
 const getCurrentDay = (day) => {
@@ -97,7 +159,7 @@ function monthFormatter() {
 }
 
 // Datos de eventos
-const events = [
+const events = ref([
   {
     id: 1,
     title: "1st of the Month",
@@ -191,12 +253,19 @@ const events = [
     icon: "fas fa-plane",
     days: 5,
   },
-];
+]);
+
+// Observa los cambios en `events` y crea una copia reactiva
+const reactiveEvents = ref([]);
+
+watch(events, (newEvents) => {
+  reactiveEvents.value = [...newEvents]; // Crea una nueva referencia
+});
 
 // Computed para mapear eventos por fecha
 const eventsMap = computed(() => {
   const map = {};
-  events.forEach((event) => {
+  events.value.forEach((event) => {
     // Asumiendo que 'event.date' está en el mismo formato "YYYY-MM-DD"
     if (!map[event.date]) {
       map[event.date] = []; // Asegúrate de inicializar el array
@@ -253,26 +322,80 @@ const onMoved = (data) => {
 };
 
 const onChange = (data) => {
-  console.log("onChange", data);
+  //console.log("onChange", data);
 };
 
 const onClickDate = (data) => {
-  console.log("onClickDate", data);
+  //onsole.log("onClickDate", data);
 };
 
+// Modifica onClickDay para manejar varios eventos por fecha
 const onClickDay = (data) => {
   const eventsForDate = eventsMap.value[data.scope.timestamp.date];
   if (eventsForDate && eventsForDate.length > 0) {
-    selectedEvent.value = eventsForDate[0]; // Puedes seleccionar el primer evento si hay múltiples
+    eventsForSelectedDate.value = eventsForDate; // Asigna todos los eventos a la variable reactiva
+    selectedDateDialog.value = data.scope.timestamp.date; // Muestra la fecha seleccionada en el diálogo
     dialogVisible.value = true;
   } else {
-    selectedEvent.value = {
-      title: "Sin eventos",
-      details: "No hay eventos para esta fecha.",
-    }; // Mensaje si no hay eventos
+    // Si no hay eventos, muestra un mensaje predeterminado
+    eventsForSelectedDate.value = [
+      { title: "Sin eventos", details: "No hay eventos para esta fecha." },
+    ];
+    selectedDateDialog.value = data.scope.timestamp.date;
     dialogVisible.value = true;
   }
 };
+const onClickEvent = (event) => {
+  // Muestra los detalles del evento específico en el diálogo
+  selectedEvent.value = event;
+  dialogVisible.value = true;
+  console.log(selectedEvent.value);
+};
+
+const newEvent = () => {
+  console.log('NUEVO EVENTO');
+  isNewEvent.value = true
+  dialogVisible.value = false
+}
+
+const onSubmit = () => {
+  if (formEvent.value.title && formEvent.value.details && formEvent.value.bgcolor) {
+    formEvent.value.date = selectedDateDialog.value;
+    console.log(formEvent.value);
+
+    // Crear el nuevo evento a partir de los datos del formulario
+    const newEvent = {
+      id: events.value.length + 1, // Genera un nuevo ID único
+      title: formEvent.value.title,
+      details: formEvent.value.details,
+      time: formEvent.value.time,
+      duration: formEvent.value.duration,
+      date: formEvent.value.date,
+      bgcolor: formEvent.value.bgcolor,
+    };
+
+    // Agregar el nuevo evento a la lista de eventos
+    events.value.push(newEvent);
+
+    console.log(events);
+
+
+    // Aquí agregar lógica para guardar el evento
+    dialogVisible.value = false; // Cierra el diálogo
+    isNewEvent.value = false; // Resetea el estado del nuevo evento
+    // Resetea el formulario
+    formEvent.value = {
+      title: '',
+      details: '',
+      time: '',
+      duration: '',
+      date: '',
+      bgcolor: ''
+    };
+  } else {
+    console.error('Por favor complete todos los campos.');
+  }
+}
 
 const onClickWorkweek = (data) => {
   console.log("onClickWorkweek", data);
