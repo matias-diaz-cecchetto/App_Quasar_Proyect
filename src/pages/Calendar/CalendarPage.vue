@@ -353,6 +353,7 @@ const eventsMap = computed(() => {
     }
   });
   console.log("eventsMap:", map); // Agrega un log aquí para depurar
+  console.log("cantidad de fechas únicas: ", Object.keys(map).length); // Cambia aquí para calcular la cantidad
   return map;
 });
 

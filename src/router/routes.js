@@ -86,7 +86,13 @@ const routes = [
       {
         path: "calendar",
         name: "CalendarPage",
-        component: () => import("src/pages/CalendarPage.vue"),
+        component: () => import("src/pages/Calendar/CalendarPage.vue"),
+        beforeEnter: authGuard,
+      },
+      {
+        path: "maps",
+        name: "MapPage",
+        component: () => import("src/pages/Maps/MapPage.vue"),
         beforeEnter: authGuard,
       },
     ],
