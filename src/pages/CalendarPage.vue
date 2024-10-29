@@ -420,7 +420,6 @@ const onClickEvent = (event) => {
 };
 
 const newEvent = () => {
-  console.log('NUEVO EVENTO');
   isNewEvent.value = true
   dialogVisible.value = false
 }
@@ -430,7 +429,6 @@ const onSubmit = () => {
   setTimeout(() => {
     if (formEvent.value.title && formEvent.value.details && formEvent.value.bgcolor) {
       formEvent.value.date = selectedDateDialog.value;
-      console.log(formEvent.value);
 
       // Crear el nuevo evento a partir de los datos del formulario
       const newEvent = {
@@ -445,9 +443,6 @@ const onSubmit = () => {
 
       // Agregar el nuevo evento a la lista de eventos
       events.value.push(newEvent);
-
-      console.log(events);
-
 
       // Aquí agregar lógica para guardar el evento
       dialogVisible.value = false; // Cierra el diálogo
@@ -464,7 +459,7 @@ const onSubmit = () => {
 
       submitting.value = true;
     } else {
-      console.error('Por favor complete todos los campos.');
+      console.error('Error al cargar los datos.');
     }
   }, 1000);
 
