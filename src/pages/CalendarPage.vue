@@ -1,14 +1,29 @@
 <template>
   <q-page class="subcontent">
-    <span class="text-h4 q-ma-md"> {{ formattedMonth }}</span>
+    <div class="flex items-center q-ma-md q-gutter-sm">
+      <q-btn @click="onToday" label="Hoy" class="q-mr-md" />
+
+      <!-- Botón de Navegación Izquierda -->
+      <q-btn @click="onPrev" flat rounded size="lg" class="q-mx-xs">
+        <i class="las la-angle-left"></i>
+      </q-btn>
+      <!-- Botón de Navegación Derecha -->
+      <q-btn @click="onNext" flat rounded size="lg" class="q-mx-xs">
+        <i class="las la-angle-right"></i>
+      </q-btn>
+      <!-- Texto de Mes -->
+      <span class="text-h6 q-mx-md">{{ formattedMonth }}</span>
+    </div>
+
+
     <q-separator spaced="" class="q-ma-md" />
 
     <div class="row justify-center q-ma-md">
       <div style="display: flex; max-width: 100%; width: 100%">
-        <q-calendar-month ref="calendarRef" :locale="locale" v-model="selectedDate" :events="reactiveEvents" animated
-          bordered focusable hoverable no-active-date :day-min-height="130" :day-height="0" @change="onChange"
-          @moved="onMoved" @click-date="onClickDate" @click-day="onClickDay" @click-workweek="onClickWorkweek"
-          @click-head-workweek="onClickHeadWorkweek" @click-head-day="onClickHeadDay">
+        <q-calendar-month style="cursor: pointer;" ref="calendarRef" :locale="locale" v-model="selectedDate"
+          :events="reactiveEvents" animated bordered focusable hoverable no-active-date :day-min-height="130"
+          :day-height="0" @change="onChange" @moved="onMoved" @click-date="onClickDate" @click-day="onClickDay"
+          @click-workweek="onClickWorkweek" @click-head-workweek="onClickHeadWorkweek" @click-head-day="onClickHeadDay">
           <template #day="{ scope: { timestamp } }">
             <template v-if="
               eventsMap[timestamp.date] && eventsMap[timestamp.date].length
@@ -29,12 +44,9 @@
         </q-calendar-month>
       </div>
     </div>
-    <div class="calendar-controls q-mt-md">
-      <q-btn @click="onPrev" label="Anterior" />
-      <q-btn @click="onToday" label="Hoy" />
-      <q-btn @click="onNext" label="Siguiente" />
-    </div>
 
+
+    <!-- modal de dialogo -->
     <q-dialog v-model="dialogVisible">
       <q-card>
         <q-card-section>
@@ -56,6 +68,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialogo de recorrido -->
     <q-dialog v-model="isNewEvent">
       <q-card style="width: 900px">
         <q-card-section>
@@ -67,24 +80,64 @@
 
                   <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
 
+                    <!-- Titulo -->
                     <q-input filled v-model="formEvent.title" label="Titulo *" hint="Titulo" lazy-rules
-                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+                      :rules="[val => val && val.length > 0 || 'Por favor, escribe algo']" />
 
-                    <q-input filled v-model="formEvent.details" label="Detalle *" hint="Detalle" lazy-rules
-                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+                    <!-- Detalle como Textarea -->
+                    <q-input filled v-model="formEvent.details" label="Detalle *" hint="Detalle" type="textarea"
+                      lazy-rules :rules="[val => val && val.length > 0 || 'Por favor, escribe algo']" />
 
-                    <q-input filled v-model="formEvent.time" label="Horario *" hint="Horario" lazy-rules
-                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+                    <!-- Horario usando q-time para seleccionar la hora -->
+                    <q-input filled v-model="formEvent.time" label="Horario *" mask="##:##" hint="HH:MM" lazy-rules
+                      :rules="[val => !!val || 'Por favor, selecciona un horario']">
+                      <template v-slot:append>
+                        <!-- Icono para desplegar el selector de tiempo -->
+                        <q-icon name="access_time" class="cursor-pointer q-ml-sm">
+                          <q-popup-proxy cover transition-show="scale" transition-hide="scale" class="bg-white rounded">
+                            <q-time v-model="formEvent.time" format24h>
+                              <!-- Botón para cerrar el selector -->
+                              <div class=" row items-center justify-end q-pt-sm">
+                                <q-btn flat label="Cerrar" color="primary" v-close-popup />
+                              </div>
+                            </q-time>
+                          </q-popup-proxy>
+                        </q-icon>
+                      </template>
+                    </q-input>
 
-                    <q-input filled v-model="formEvent.duration" label="Tiempo *" hint="Tiempo" lazy-rules
-                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+                    <!-- Duración en minutos usando un input numérico -->
+                    <q-input filled v-model.number="formEvent.duration" label="Duración (en minutos) *"
+                      hint="Duración en minutos" type="number" min="0" lazy-rules
+                      :rules="[val => val > 0 || 'Por favor, ingresa un valor positivo']" />
 
-                    <q-input filled v-model="formEvent.bgcolor" label="Color *" hint="Color" lazy-rules
-                      :rules="[val => val && val.length > 0 || 'Please type something']" />
+                    <!-- Selector de Color usando q-color -->
+                    <!-- <q-input filled v-model="formEvent.bgcolor" class="my-input" label="Color *"
+                      hint="Selecciona el color">
+                      <template v-slot:append>
+                        <q-icon :style="{ color: formEvent.bgcolor }" name="lens" class="q-mr-sm" />
+                        <q-icon name="colorize" class="cursor-pointer">
+                          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                            <q-color v-model="formEvent.bgcolor" />
+                          </q-popup-proxy>
+                        </q-icon>
+                      </template>
+                    </q-input> -->
 
+                    <!-- Selector de Color usando q-select con opciones de colores por nombre -->
+                    <q-select filled v-model="formEvent.bgcolor" label="Color *" hint="Selecciona el color"
+                      :options="colorOptions" map-options>
+                      <template v-slot:append>
+                        <!-- Vista previa del color seleccionado -->
+                        <q-icon :style="{ color: formEvent.bgcolor.value }" name="lens" class="q-mr-sm" />
+                      </template>
+                    </q-select>
+
+
+                    <!-- Botones de Acción -->
                     <q-card-actions class="q-mt-md">
-                      <q-btn flat label="Submit" type="submit" color="primary" />
-                      <q-btn flat label="cancelar" @click="dialogVisible = false; isNewEvent = false" />
+                      <q-btn flat :loading="submitting" label="Submit" type="submit" color="primary" />
+                      <q-btn flat label="Cancelar" @click="dialogVisible = false; isNewEvent = false" />
                     </q-card-actions>
 
                   </q-form>
@@ -96,6 +149,7 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
 
   </q-page>
 </template>
@@ -130,6 +184,19 @@ const formEvent = ref({
   date: '',
   bgcolor: ''
 })
+const submitting = ref(false);
+
+
+const colorOptions = [
+  { label: 'Rojo', value: 'red' },
+  { label: 'Azul', value: 'blue' },
+  { label: 'Verde', value: 'green' },
+  { label: 'Amarillo', value: 'yellow' },
+  { label: 'Naranja', value: 'orange' },
+  { label: 'Púrpura', value: 'purple' },
+  { label: 'Rosa', value: 'pink' },
+  { label: 'Coral', value: 'coral' }
+];
 
 // Función para obtener el día actual
 const getCurrentDay = (day) => {
@@ -255,7 +322,7 @@ const events = ref([
   },
 ]);
 
-// Observa los cambios en `events` y crea una copia reactiva
+// Observa los cambios en events y crea una copia reactiva
 const reactiveEvents = ref([]);
 
 watch(events, (newEvents) => {
@@ -359,42 +426,48 @@ const newEvent = () => {
 }
 
 const onSubmit = () => {
-  if (formEvent.value.title && formEvent.value.details && formEvent.value.bgcolor) {
-    formEvent.value.date = selectedDateDialog.value;
-    console.log(formEvent.value);
+  submitting.value = true;
+  setTimeout(() => {
+    if (formEvent.value.title && formEvent.value.details && formEvent.value.bgcolor) {
+      formEvent.value.date = selectedDateDialog.value;
+      console.log(formEvent.value);
 
-    // Crear el nuevo evento a partir de los datos del formulario
-    const newEvent = {
-      id: events.value.length + 1, // Genera un nuevo ID único
-      title: formEvent.value.title,
-      details: formEvent.value.details,
-      time: formEvent.value.time,
-      duration: formEvent.value.duration,
-      date: formEvent.value.date,
-      bgcolor: formEvent.value.bgcolor,
-    };
+      // Crear el nuevo evento a partir de los datos del formulario
+      const newEvent = {
+        id: events.value.length + 1, // Genera un nuevo ID único
+        title: formEvent.value.title,
+        details: formEvent.value.details,
+        time: formEvent.value.time,
+        duration: formEvent.value.duration,
+        date: formEvent.value.date,
+        bgcolor: formEvent.value.bgcolor?.value,
+      };
 
-    // Agregar el nuevo evento a la lista de eventos
-    events.value.push(newEvent);
+      // Agregar el nuevo evento a la lista de eventos
+      events.value.push(newEvent);
 
-    console.log(events);
+      console.log(events);
 
 
-    // Aquí agregar lógica para guardar el evento
-    dialogVisible.value = false; // Cierra el diálogo
-    isNewEvent.value = false; // Resetea el estado del nuevo evento
-    // Resetea el formulario
-    formEvent.value = {
-      title: '',
-      details: '',
-      time: '',
-      duration: '',
-      date: '',
-      bgcolor: ''
-    };
-  } else {
-    console.error('Por favor complete todos los campos.');
-  }
+      // Aquí agregar lógica para guardar el evento
+      dialogVisible.value = false; // Cierra el diálogo
+      isNewEvent.value = false; // Resetea el estado del nuevo evento
+      // Resetea el formulario
+      formEvent.value = {
+        title: '',
+        details: '',
+        time: '',
+        duration: '',
+        date: '',
+        bgcolor: ''
+      };
+
+      submitting.value = true;
+    } else {
+      console.error('Por favor complete todos los campos.');
+    }
+  }, 1000);
+
 }
 
 const onClickWorkweek = (data) => {
@@ -416,6 +489,7 @@ const badgeClasses = (event, type) => {
     "rounded-border": true,
   };
 };
+
 
 const badgeStyles = (day, event) => {
   return {};
