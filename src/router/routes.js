@@ -101,6 +101,12 @@ const routes = [
         component: () => import("src/pages/Products/ProductsPage.vue"),
         beforeEnter: authGuard,
       },
+      {
+        path: "carta",
+        name: "CartaPage",
+        component: () => import("src/pages/Cart/CartaPage.vue"),
+        beforeEnter: authGuard,
+      },
     ],
   },
   {

@@ -63,4 +63,11 @@ export const linksList = [
     link: "ProductsPage",
     authentication: true,
   },
+  {
+    title: "Carta",
+    caption: "carta_page",
+    icon: "las la-store-alt",
+    link: "CartaPage",
+    authentication: true,
+  },
 ];
