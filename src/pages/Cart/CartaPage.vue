@@ -11,34 +11,27 @@
 
         <q-separator spaced />
 
-        <div class="q-pa-md flex flex-center">
-          <q-card class="my-card" style="width: 100%;">
-            <q-card-section horizontal>
-              <q-img class="col-3"
-                src="https://www.circuitogastronomico.com/wp-content/uploads/2023/04/pizzar-lomito-2.jpg"
-                style="border-radius: 8px;" />
+        <div class="q-pa-md column items-center">
+          <q-card v-for="product in products" :key="product.id" class="my-card"
+            style="width: 100%; max-width: 600px; margin-bottom: 20px;">
+            <q-card-section horizontal class="my-card-section">
+              <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
 
-              <q-card-section class="col-10 row" style="width: calc(100% - 25%); padding-left: 10px;">
-                <div class="col-8 " style="padding: 10px;">
-                  <div class="text-h6 q-mt-sm q-mb-xs">Promo 2 lomos</div>
-                  <div class="text-caption text-grey">
-                    Lomo, jamón cocido, queso, huevo, lechuga, tomate, mayonesa casera y papas fritas.
-                  </div>
+              <q-card-section class="col-9 content-section row">
+                <div class="text-content col-8">
+                  <div class="product-title">{{ product.name }}</div>
+                  <div class="product-description">{{ product.description }}</div>
                 </div>
 
-                <div class="col-4" style="padding: 10px;">
-                  <div class="text-subtitle1 flex justify-end q-mt-sm" style="font-size: 15px;margin: 10px;">
-                    $5000
+                <div class="price-section col-4">
+                  <div class="product-price">{{ `$${product.price}` }}</div>
+                  <div class="quantity-control">
+                    <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)" />
+                    <div class="quantity">{{ product.quantity }}</div>
+                    <q-btn dense flat round icon="add" @click="increaseQuantity(product)" />
                   </div>
-
-                  <div class="flex justify-end q-my-md" style="width: 100%;">
-                    <q-btn style="font-size: 8px;" dense flat round icon="remove" @click="decreaseQuantity" />
-                    <div class="flex items-center text-body1 q-mx-sm" style="font-size: 12px;">{{ quantity }}</div>
-                    <q-btn style="font-size: 8px;" dense flat round icon="add" @click="increaseQuantity" />
-                  </div>
-
-                  <div class="flex justify-end" style="width: 100%;">
-                    <q-btn color="positive" style="font-size: 12px; padding: 5px 10px;" @click="addToCart">
+                  <div class="add-button">
+                    <q-btn color="positive" @click="addToCart(product)">
                       Añadir
                     </q-btn>
                   </div>
@@ -48,7 +41,33 @@
           </q-card>
         </div>
 
+        <!-- Carrito de Compras -->
+        <q-dialog v-model="cartVisible">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">Carrito de Compras</div>
+            </q-card-section>
 
+            <q-card-section v-if="cart.length > 0">
+              <div v-for="item in cart" :key="item.id" class="q-mb-md">
+                <div>{{ item.name }} - {{ item.quantity }} x ${{ item.price }} = ${{ item.quantity * item.price }}</div>
+              </div>
+            </q-card-section>
+
+            <q-card-section v-else>
+              <div>El carrito está vacío</div>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn flat label="Cerrar" color="primary" @click="cartVisible = false" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <!-- Botón para ver el Carrito -->
+        <q-btn vertical-actions-align="center" glossy direction="up" color="primary" @click="cartVisible = true">
+          Ver Carrito ({{ totalItems }} items)
+        </q-btn>
 
       </div>
     </div>
@@ -63,32 +82,39 @@ defineOptions({
 
 import { ref, computed, onMounted } from 'vue';
 
+const cart = ref([]);
+const cartVisible = ref(false);
 
-const quantity = ref(1);
+
 // Array de productos
-const products = [
-  { id: 1, titulo: "Adidas Ultraboost 21", descripcion: "Zapatillas deportivas con una amortiguación excepcional y un diseño moderno, ideales para corredores.", precio: 25.99, stock: 10, imagen: "https://sportotalar.vtexassets.com/arquivos/ids/470617/HP7543-1074-CLOUD-WHITE-CORE-BLACK-CRYSTAL-WHIT_1.png?v=638350748048270000" },
-  { id: 2, titulo: "Adidas Stan Smith", descripcion: "Un clásico atemporal, estas zapatillas ofrecen comodidad y estilo con un diseño minimalista.", precio: 15.75, stock: 0, imagen: "https://realplaza.vtexassets.com/arquivos/ids/35149159-800-auto?v=638439730762830000&width=800&height=auto&aspect=true" },
-  { id: 3, titulo: "Adidas NMD_R1", descripcion: "Zapatillas con un estilo urbano, combinan comodidad y modernidad, perfectas para el uso diario.", precio: 30.5, stock: 5, imagen: "https://plazavea.vteximg.com.br/arquivos/ids/29324808-512-512/image-d94e18d801074a41ac1cd821e104ed22.jpg" },
-  { id: 4, titulo: "Adidas Superstar", descripcion: "Icono del estilo streetwear, estas zapatillas son cómodas y versátiles, ideales para cualquier ocasión.", precio: 45.0, stock: 2, imagen: "https://www.bompie.com.ar/media/catalog/product/cache/1e7c11b43132c034d445b386916b52f7/1/-/1-gw925.jpg" },
-  { id: 5, titulo: "Adidas Yeezy Boost 350", descripcion: "Diseñadas por Kanye West, estas zapatillas ofrecen un estilo único y una comodidad sin igual.", precio: 10.0, stock: 20, imagen: "https://equipovallejo.vtexassets.com/arquivos/ids/289494-800-auto?v=638436886516430000&width=800&height=auto&aspect=true" },
-  { id: 6, titulo: "Adidas Gazelle", descripcion: "Con un diseño retro, las Gazelle son perfectas para un look casual con un toque vintage.", precio: 22.0, stock: 15, imagen: "https://puntodeportivoar.vtexassets.com/arquivos/ids/427115/00007963.jpg?v=638540627300600000" },
-  { id: 7, titulo: "Adidas Falcon", descripcion: "Zapatillas con una mezcla de colores vibrantes, combinan estilo y comodidad para el uso diario.", precio: 19.99, stock: 0, imagen: "https://www.bompie.com.ar/media/catalog/product/cache/1e7c11b43132c034d445b386916b52f7/1/-/1-_if7359.jpg" },
-  { id: 8, titulo: "Adidas Terrex Agravic", descripcion: "Ideales para actividades al aire libre, estas zapatillas ofrecen tracción y soporte en terrenos difíciles.", precio: 35.5, stock: 3, imagen: "https://equipovallejo.vtexassets.com/arquivos/ids/337891-800-auto?v=638604681362370000&width=800&height=auto&aspect=true" },
-  { id: 9, titulo: "Adidas Pureboost", descripcion: "Zapatillas ligeras diseñadas para proporcionar una sensación natural al correr, perfectas para los entusiastas del fitness.", precio: 60.0, stock: 1, imagen: "https://celadasa.vtexassets.com/arquivos/ids/241062-800-auto?v=638321254242400000&width=800&height=auto&aspect=true" },
-  { id: 10, titulo: "Adidas X_PLR", descripcion: "Zapatillas de diseño contemporáneo, combinan estilo moderno y confort para un uso diario.", precio: 12.99, stock: 8, imagen: "https://s3.sa-east-1.amazonaws.com/www.vaypol.com.ar/variants/s5ty6kruvpik0tggo4avk1m9io7h/77e513bcd3762f47919c96f85e400038a39acdbb0d268f51c1fd98fe5327bd96" },
-];
+const products = ref([
+  { id: 1, name: 'Promo 2 lomos', description: 'Lomo, jamón cocido, queso, huevo, lechuga, tomate, mayonesa casera y papas fritas.', price: 5000, img: 'https://www.circuitogastronomico.com/wp-content/uploads/2023/04/pizzar-lomito-2.jpg', quantity: 1 },
+  { id: 2, name: 'Hamburguesa completa', description: 'Carne, queso, lechuga, tomate, huevo y papas fritas.', price: 3200, img: 'https://www.clarin.com/img/2022/05/27/0HXb0UR0v_2000x1500__1.jpg', quantity: 1 },
+  { id: 3, name: 'Pizza Napolitana', description: 'Muzzarella, tomate fresco, orégano, y aceitunas.', price: 2800, img: 'https://irp-cdn.multiscreensite.com/0d51dde7/MOBILE/jpg/1977310-20190108_221129_%282%29.w1024.jpg', quantity: 1 },
+  { id: 4, name: 'Pollo al horno', description: 'Pollo al horno rebosado con verduras.', price: 1500, img: 'https://www.coren.es/wp-content/uploads/2017/05/Tips-evitar-pollo-corral-seco.jpeg', quantity: 1 },
+  { id: 5, name: 'Sándwich de milanesa', description: 'Milanesa de carne, lechuga, tomate, y mayonesa.', price: 2700, img: 'https://resizer.glanacion.com/resizer/v2/milanesa-a-la-napolitana-con-guarnicion-de-papas-VLWFAANIWBGPFO4CSUHS7RYVVQ.jpg?auth=335fda04cf2733e39d11ca0ba979c1d0a8a55e6cdec15e4d5b00cfd59fbf9ed8&width=1280&height=854&quality=70&smart=true', quantity: 1 },
+  { id: 6, name: 'Tarta de Verdura', description: 'Tarta casera de espinaca y queso.', price: 2200, img: 'https://cdn0.recetasgratis.net/es/posts/4/5/1/tarta_de_verduras_asadas_57154_orig.jpg', quantity: 1 }
+]);
 
-function increaseQuantity() {
-  quantity.value++;
+function decreaseQuantity(product) {
+  if (product.quantity > 1) product.quantity--;
 }
-
-function decreaseQuantity() {
-  if (quantity.value > 1) {
-    quantity.value--;
+function increaseQuantity(product) {
+  product.quantity++;
+}
+function addToCart(product) {
+  const existingItem = cart.value.find(item => item.id === product.id);
+  if (existingItem) {
+    existingItem.quantity += product.quantity;
+  } else {
+    cart.value.push({ ...product, quantity: product.quantity });
   }
+  product.quantity = 1; // Reinicia la cantidad en el producto original
 }
 
+const totalItems = computed(() => {
+  return cart.value.reduce((sum, item) => sum + item.quantity, 0);
+});
 </script>
 
 <style>
@@ -99,6 +125,7 @@ function decreaseQuantity() {
 .q-card {
   height: 100%;
   border-radius: 8px;
+  width: 100%;
 }
 
 .my-group-products {
@@ -118,5 +145,91 @@ function decreaseQuantity() {
 
 .my-group-products {
   padding: 0px 50px;
+}
+
+
+.my-columns {
+  padding: 10px;
+  margin: 10 !important;
+}
+
+.my-card {
+  width: 100%;
+  height: 100px;
+  max-width: 600px;
+}
+
+.my-card-section {
+  height: 100%;
+}
+
+.product-img {
+  border-radius: 8px;
+}
+
+.content-section {
+  padding: 0;
+}
+
+/* Text content section */
+.text-content {
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.product-title {
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.product-description {
+  font-size: 10px;
+  line-height: 1.2;
+  color: grey;
+}
+
+/* Price section */
+.price-section {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.product-price {
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+/* Quantity control */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  margin: 0;
+}
+
+.quantity-control .q-btn {
+  font-size: 8px;
+}
+
+.quantity {
+  font-size: 10px;
+  margin: 0 4px;
+}
+
+/* Add button */
+.add-button {
+  margin-top: 5px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-button .q-btn {
+  font-size: 10px;
+  padding: 4px 8px;
 }
 </style>
