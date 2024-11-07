@@ -17,19 +17,20 @@
               <q-input v-model="formData.dni" label="DNI" hint="Ingrese su dni" type="number" required />
             </div>
             <div class="col-5">
-                <q-input filled v-model="formData.fecha_nacimiento" mask="date" :rules="['date']" hint="Ingrese su fecha de nacimiento" label="fecha de nacimiento">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                        <q-date v-model="formData.fecha_nacimiento">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Close" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
+              <q-input filled v-model="formData.fecha_nacimiento" mask="date" :rules="['date']"
+                hint="Ingrese su fecha de nacimiento" label="fecha de nacimiento">
+                <template v-slot:append>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                      <q-date v-model="formData.fecha_nacimiento">
+                        <div class="row items-center justify-end">
+                          <q-btn v-close-popup label="Close" color="primary" flat />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
             </div>
           </div>
           <div class="row justify-between q-my-md">
@@ -52,7 +53,7 @@
             </q-btn>
 
             <!-- <q-btn type="submit" label="Guardar" color="positive" class="q-ma-md" /> -->
-            <q-btn type="submit" label="Vovler" color="accent" class="q-ma-md" @click="goToUser" />
+            <q-btn type="submit" label="Volver" color="accent" class="q-ma-md" @click="goToUser" />
           </div>
 
         </form>

@@ -47,6 +47,8 @@
           </q-card>
         </div>
 
+        <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- SECCION -->
         <!-- Carrito de Compras -->
         <q-dialog v-model="cartVisible">
           <q-card>
@@ -80,6 +82,53 @@
           </q-btn>
         </q-page-sticky>
 
+        <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- SECCION: como pedir -->
+        <q-page-sticky v-if="totalItems == 0" position="bottom" :offset="[18, 18]">
+          <q-btn
+            style="position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: 80vw; max-width: 500px; min-width: 150px; padding: 10px;"
+            color="accent" @click="como_pedir = true">
+            <div class="flex justify-between" style="width: 100%; align-items: center;">
+              <span>¿como pedir?</span>
+              <div>
+                <q-icon name="help_outline" />
+              </div>
+            </div>
+          </q-btn>
+        </q-page-sticky>
+
+        <q-dialog v-model="como_pedir" @before-show="step = 4">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">¿Cómo pedir?</div>
+            </q-card-section>
+
+            <q-card-section style="padding: 0px;">
+              <q-stepper v-model="step" vertical color="primary" animated default-icon="check">
+                <q-step :name="1" title="Seleccione los productos que desea" :done="step > 1">
+                  Seleccione todos los productos que desea de la tienda, inserte su cantidad y opciones.
+                  <q-stepper-navigation>
+                    <q-btn @click="step = 2" color="primary" label="Continuar" />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step :name="2" title="Revisa tu pedido y complete los datos" :done="step > 2">
+                  Luego revise que todo lo que seleccionó y complete los datos personales para la tienda.
+                  <q-stepper-navigation>
+                    <q-btn @click="step = 3" color="primary" label="Continuar" />
+                    <q-btn flat @click="step = 1" color="primary" label="Atrás" class="q-ml-sm" />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step :name="3" title="Generamos tu pedido para que la tienda lo reciba por su WhatsApp"
+                  :done="step > 3">
+                  En este paso le enviamos un WhatsApp a la tienda para realizar su pedido.
+                </q-step>
+              </q-stepper>
+            </q-card-section>
+          </q-card>
+        </q-dialog>
+
       </div>
     </div>
   </div>
@@ -98,6 +147,8 @@ const cart = ref([]);
 const cartVisible = ref(false);
 const $q = useQuasar();
 const cantProduct = ref(0);
+const step = ref(4)
+const como_pedir = ref(false);
 
 // Array de productos
 const products = ref([
@@ -106,7 +157,11 @@ const products = ref([
   { id: 3, name: 'Pizza Napolitana', description: 'Muzzarella, tomate fresco, orégano, y aceitunas.', price: 2800, img: 'https://irp-cdn.multiscreensite.com/0d51dde7/MOBILE/jpg/1977310-20190108_221129_%282%29.w1024.jpg', quantity: 1 },
   { id: 4, name: 'Pollo al horno', description: 'Pollo al horno rebosado con verduras.', price: 1500, img: 'https://www.coren.es/wp-content/uploads/2017/05/Tips-evitar-pollo-corral-seco.jpeg', quantity: 1 },
   { id: 5, name: 'Sándwich de milanesa', description: 'Milanesa de carne, lechuga, tomate, y mayonesa.', price: 2700, img: 'https://resizer.glanacion.com/resizer/v2/milanesa-a-la-napolitana-con-guarnicion-de-papas-VLWFAANIWBGPFO4CSUHS7RYVVQ.jpg?auth=335fda04cf2733e39d11ca0ba979c1d0a8a55e6cdec15e4d5b00cfd59fbf9ed8&width=1280&height=854&quality=70&smart=true', quantity: 1 },
-  { id: 6, name: 'Tarta de Verdura', description: 'Tarta casera de espinaca y queso.', price: 2200, img: 'https://cdn0.recetasgratis.net/es/posts/4/5/1/tarta_de_verduras_asadas_57154_orig.jpg', quantity: 1 }
+  { id: 6, name: 'Tarta de Verdura', description: 'Tarta casera de espinaca y queso.', price: 2200, img: 'https://cdn0.recetasgratis.net/es/posts/4/5/1/tarta_de_verduras_asadas_57154_orig.jpg', quantity: 1 },
+  { id: 7, name: 'Pasteles de Carne', description: 'Pasteles rellenas de carne, cebolla y especias.', price: 1800, img: 'https://www.clarin.com/img/2022/05/11/Hk09WmV7X_720x0__1.jpg', quantity: 1 },
+  { id: 8, name: 'Pastel de Papa', description: 'Pastel al horno con carne, puré de papa y gratinado.', price: 2500, img: 'https://media.lacapital.com.ar/p/a8535113ee273a29b3a46f4225b35df3/adjuntos/205/imagenes/018/078/0018078012/1200x675/smart/pastel-carne1jpg.jpg', quantity: 1 },
+  { id: 9, name: 'Ensalada Caesar', description: 'Lechuga, pollo, queso parmesano, crutones y aderezo Caesar.', price: 1900, img: 'https://comedera.com/wp-content/uploads/sites/9/2023/10/shutterstock_1087243763.jpg', quantity: 1 },
+  { id: 10, name: 'Tarta de Manzana', description: 'Tarta de manzana caramelizada con masa quebrada.', price: 2100, img: 'https://i0.wp.com/www.manualidadesapasos.com/wp-content/uploads/2020/04/receta-tarta-de-manzana.jpg?fit=800%2C534&ssl=1', quantity: 1 }
 ]);
 
 function decreaseQuantity(product) {
