@@ -326,4 +326,15 @@ const totalItems = computed(() => {
   font-size: 0.75rem;
   /* Ajusta el tamaño de la letra */
 }
+
+@media (max-width: 600px) {
+  /* .product-img {
+    width: 100%;
+    height: auto;
+  }
+
+  .price-section {
+    display: block;
+  } */
+}
 </style>
