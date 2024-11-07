@@ -6,7 +6,7 @@
       <!-- Lista de Productos -->
       <div class="col-xs-12 col-md-9">
         <div class="row items-center justify-between">
-          <span class="text-h4">Carta</span>
+          <!-- <span class="text-h4">Carta</span> -->
         </div>
 
         <q-separator spaced />
@@ -26,15 +26,21 @@
                 <div class="price-section col-4">
                   <div class="product-price">{{ `$${product.price}` }}</div>
                   <div class="quantity-control">
-                    <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)" />
+                    <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)"
+                      style="font-size: 9px; padding: 2px;" />
                     <div class="quantity">{{ product.quantity }}</div>
-                    <q-btn dense flat round icon="add" @click="increaseQuantity(product)" />
+                    <q-btn dense flat round icon="add" @click="increaseQuantity(product)"
+                      style="font-size: 9px; padding: 2px;" />
                   </div>
                   <div class="add-button">
-                    <q-btn color="positive" @click="addToCart(product)">
+                    <q-btn v-if="!isInCart(product)" color="positive" @click="addToCart(product)">
                       Añadir
                     </q-btn>
+                    <q-btn v-else color="negative" @click="deleteFromCart(product)">
+                      Cancelar
+                    </q-btn>
                   </div>
+
                 </div>
               </q-card-section>
             </q-card-section>
@@ -64,10 +70,15 @@
           </q-card>
         </q-dialog>
 
-        <!-- Botón para ver el Carrito -->
-        <q-btn vertical-actions-align="center" glossy direction="up" color="primary" @click="cartVisible = true">
-          Ver Carrito ({{ totalItems }} items)
-        </q-btn>
+        <!-- Boton fotante para carrito -->
+        <q-page-sticky v-if="totalItems > 0" position="bottom-right" :offset="[18, 18]">
+          <!-- @click="showCart()" // Popup abajo -->
+          <!-- @click="cartVisible = true" // Popup en el medio -->
+          <q-btn fab color="positive" icon="shopping_cart" @click="cartVisible = true">
+            <q-badge floating color="red" text-color="white" :label="cantProduct" class="cart-badge"
+              v-if="cantProduct > 0" />
+          </q-btn>
+        </q-page-sticky>
 
       </div>
     </div>
@@ -80,11 +91,13 @@ defineOptions({
   name: "CartaPage",
 });
 
+import { useQuasar } from 'quasar';
 import { ref, computed, onMounted } from 'vue';
 
 const cart = ref([]);
 const cartVisible = ref(false);
-
+const $q = useQuasar();
+const cantProduct = ref(0);
 
 // Array de productos
 const products = ref([
@@ -102,57 +115,68 @@ function decreaseQuantity(product) {
 function increaseQuantity(product) {
   product.quantity++;
 }
-function addToCart(product) {
-  const existingItem = cart.value.find(item => item.id === product.id);
-  if (existingItem) {
-    existingItem.quantity += product.quantity;
-  } else {
-    cart.value.push({ ...product, quantity: product.quantity });
-  }
-  product.quantity = 1; // Reinicia la cantidad en el producto original
-}
 
+// Elimino del carrito
+function addToCart(product) {
+  if (!isInCart(product)) {
+    cart.value.push({ ...product, quantity: product.quantity });
+    cantProduct.value++;
+  }
+}
+// Elimino del carrito
+function deleteFromCart(product) {
+  cart.value = cart.value.filter(item => item.id !== product.id);
+  product.quantity = 1;
+  cantProduct.value--;
+}
+// Verifica si el producto ya está en el carrito
+function isInCart(product) {
+  return cart.value.some(item => item.id === product.id);
+}
+// Total de articulos
 const totalItems = computed(() => {
   return cart.value.reduce((sum, item) => sum + item.quantity, 0);
 });
+
+/* const showCart = () => {
+  const totalItems = cart.value.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cart.value.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+  const message = `
+    <div style="padding: 16px;">
+      <h6>Carrito (${totalItems} artículos)</h6>
+      ${cart.value.map(item => `
+        <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+          <span>${item.name}</span>
+          <span>${item.quantity} x $${item.price} = $${item.quantity * item.price}</span>
+        </div>
+      `).join('')}
+      <hr>
+      <strong>Total: $${totalPrice}</strong>
+    </div>
+  `;
+
+  $q.bottomSheet({
+    message: message,
+    actions: [
+      { label: "Finalizar Compra", color: "positive", icon: "shopping_cart", id: "checkout" },
+      { label: "Cancelar", color: "negative", icon: "cancel", id: "cancel" }
+    ]
+  })
+    .onOk(action => {
+      if (action.id === "checkout") {
+        console.log("Procesando compra...");
+      }
+    })
+    .onCancel(() => console.log("Carrito cancelado"))
+    .onDismiss(() => console.log("Se cerró el BottomSheet"));
+}; */
+
+
+
 </script>
 
 <style>
-.my-content {
-  padding: 10px;
-}
-
-.q-card {
-  height: 100%;
-  border-radius: 8px;
-  width: 100%;
-}
-
-.my-group-products {
-  padding: 0px 150px;
-}
-
-.my-content-filter {
-  font-size: 13px;
-}
-
-.my-filters-card {
-  margin-bottom: 20px;
-  font-size: 13px;
-  padding: 16px;
-  /* background-color: #f5f5f5 */
-}
-
-.my-group-products {
-  padding: 0px 50px;
-}
-
-
-.my-columns {
-  padding: 10px;
-  margin: 10 !important;
-}
-
 .my-card {
   width: 100%;
   height: 100px;
@@ -231,5 +255,20 @@ const totalItems = computed(() => {
 .add-button .q-btn {
   font-size: 10px;
   padding: 4px 8px;
+}
+
+.quantity-control .q-btn {
+  font-size: 12px;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.75rem;
+  /* Ajusta el tamaño de la letra */
 }
 </style>

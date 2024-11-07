@@ -2,17 +2,8 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-        <q-toolbar-title @click="goToIndex" class="my-title"
-          >Proyect</q-toolbar-title
-        >
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <q-toolbar-title @click="goToIndex" class="my-title">Proyect</q-toolbar-title>
         <!--  <img
           src="../assets/logos/logos_juntos_1.png"
           width="100px"
@@ -44,14 +35,7 @@
 
                 <div class="text-subtitle1 q-mt-md q-mb-xs">John Doe</div>
 
-                <q-btn
-                  color="primary"
-                  label="Logout"
-                  push
-                  size="sm"
-                  v-close-popup
-                  @click="handleLogout"
-                />
+                <q-btn color="primary" label="Logout" push size="sm" v-close-popup @click="handleLogout" />
               </div>
             </div>
           </q-btn-dropdown>
@@ -73,14 +57,8 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header>Menu</q-item-label>
-        <EssentialLink
-          v-for="link in filteredLinksList"
-          :key="link.title"
-          :title="link.title"
-          :caption="link.caption"
-          :icon="link.icon"
-          :link="link.link"
-        />
+        <EssentialLink v-for="link in filteredLinksList" :key="link.title" :title="link.title" :caption="link.caption"
+          :icon="link.icon" :link="link.link" />
       </q-list>
     </q-drawer>
 
@@ -89,7 +67,7 @@
       <router-view />
 
       <!-- Floating Action Button -->
-      <q-page-sticky position="bottom-right" :offset="fabPos">
+      <!-- <q-page-sticky position="bottom-right" :offset="fabPos">
         <q-fab
           icon="add"
           direction="up"
@@ -133,9 +111,9 @@
           >
             <q-tooltip>Login</q-tooltip>
           </q-fab-action>
-          <!-- v-if="isAuthenticated" -->
+
         </q-fab>
-      </q-page-sticky>
+      </q-page-sticky> -->
     </q-page-container>
   </q-layout>
 </template>
