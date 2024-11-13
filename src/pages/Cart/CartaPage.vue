@@ -1,135 +1,110 @@
 <template>
   <div class="q-pa-md">
-    <div class="">
 
 
-      <!-- Lista de Productos -->
-      <div class="col-xs-12 col-md-9">
-        <div class="row items-center justify-between">
-          <!-- <span class="text-h4">Carta</span> -->
-        </div>
-
-        <q-separator spaced />
-
-        <div class="q-pa-md column items-center">
-          <q-card v-for="product in products" :key="product.id" class="my-card"
-            style="width: 100%; max-width: 600px; margin-bottom: 20px;">
-            <q-card-section horizontal class="my-card-section">
-              <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
-
-              <q-card-section class="col-9 content-section row">
-                <div class="text-content col-8">
-                  <div class="product-title">{{ product.name }}</div>
-                  <div class="product-description">{{ product.description }}</div>
-                </div>
-
-                <div class="price-section col-4">
-                  <div class="product-price">{{ `$${product.price}` }}</div>
-                  <div class="quantity-control">
-                    <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)"
-                      style="font-size: 9px; padding: 2px;" />
-                    <div class="quantity">{{ product.quantity }}</div>
-                    <q-btn dense flat round icon="add" @click="increaseQuantity(product)"
-                      style="font-size: 9px; padding: 2px;" />
-                  </div>
-                  <div class="add-button">
-                    <q-btn v-if="!isInCart(product)" color="positive" @click="addToCart(product)">
-                      Añadir
-                    </q-btn>
-                    <q-btn v-else color="negative" @click="deleteFromCart(product)">
-                      Cancelar
-                    </q-btn>
-                  </div>
-
-                </div>
-              </q-card-section>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
-        <!-- SECCION -->
-        <!-- Carrito de Compras -->
-        <q-dialog v-model="cartVisible">
-          <q-card>
-            <q-card-section>
-              <div class="text-h6">Carrito de Compras</div>
-            </q-card-section>
-
-            <q-card-section v-if="cart.length > 0">
-              <div v-for="item in cart" :key="item.id" class="q-mb-md">
-                <div>{{ item.name }} - {{ item.quantity }} x ${{ item.price }} = ${{ item.quantity * item.price }}</div>
-              </div>
-            </q-card-section>
-
-            <q-card-section v-else>
-              <div>El carrito está vacío</div>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn flat label="Cerrar" color="primary" @click="cartVisible = false" />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
-
-        <!-- Boton fotante para carrito -->
-        <q-page-sticky v-if="totalItems > 0" position="bottom-right" :offset="[18, 18]">
-          <!-- @click="showCart()" // Popup abajo -->
-          <!-- @click="cartVisible = true" // Popup en el medio -->
-          <q-btn fab color="positive" icon="shopping_cart" @click="cartVisible = true">
-            <q-badge floating color="red" text-color="white" :label="cantProduct" class="cart-badge"
-              v-if="cantProduct > 0" />
-          </q-btn>
-        </q-page-sticky>
-
-        <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
-        <!-- SECCION: como pedir -->
-        <q-page-sticky v-if="totalItems == 0" position="bottom" :offset="[18, 18]">
-          <q-btn
-            style="position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: 80vw; max-width: 500px; min-width: 150px; padding: 10px;"
-            color="accent" @click="como_pedir = true">
-            <div class="flex justify-between" style="width: 100%; align-items: center;">
-              <span>¿como pedir?</span>
-              <div>
-                <q-icon name="help_outline" />
-              </div>
-            </div>
-          </q-btn>
-        </q-page-sticky>
-
-        <q-dialog v-model="como_pedir" @before-show="step = 4">
-          <q-card>
-            <q-card-section>
-              <div class="text-h6">¿Cómo pedir?</div>
-            </q-card-section>
-
-            <q-card-section style="padding: 0px;">
-              <q-stepper v-model="step" vertical color="primary" animated default-icon="check">
-                <q-step :name="1" title="Seleccione los productos que desea" :done="step > 1">
-                  Seleccione todos los productos que desea de la tienda, inserte su cantidad y opciones.
-                  <q-stepper-navigation>
-                    <q-btn @click="step = 2" color="primary" label="Continuar" />
-                  </q-stepper-navigation>
-                </q-step>
-
-                <q-step :name="2" title="Revisa tu pedido y complete los datos" :done="step > 2">
-                  Luego revise que todo lo que seleccionó y complete los datos personales para la tienda.
-                  <q-stepper-navigation>
-                    <q-btn @click="step = 3" color="primary" label="Continuar" />
-                    <q-btn flat @click="step = 1" color="primary" label="Atrás" class="q-ml-sm" />
-                  </q-stepper-navigation>
-                </q-step>
-
-                <q-step :name="3" title="Generamos tu pedido para que la tienda lo reciba por su WhatsApp"
-                  :done="step > 3">
-                  En este paso le enviamos un WhatsApp a la tienda para realizar su pedido.
-                </q-step>
-              </q-stepper>
-            </q-card-section>
-          </q-card>
-        </q-dialog>
-
+    <!-- Lista de Productos -->
+    <div class="col-xs-12 col-md-9">
+      <div class="row items-center justify-between">
+        <!-- <span class="text-h4">Carta</span> -->
       </div>
+
+      <div class="category-slider category-slider-sticky">
+        <div class="categories" ref="categoryContainer">
+          <button v-for="category in categories" :key="category" class="category-button">
+            {{ category }}
+          </button>
+        </div>
+      </div>
+
+      <q-separator spaced />
+
+      <div class="q-pa-md column items-center">
+        <q-card v-for="product in products" :key="product.id" class="my-card"
+          style="width: 100%; max-width: 600px; margin-bottom: 20px;">
+          <q-card-section horizontal class="my-card-section">
+            <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
+
+            <q-card-section class="col-9 content-section row">
+              <div class="text-content col-9">
+                <div class="product-title">{{ product.name }}</div>
+                <div class="product-description">{{ product.description }}</div>
+              </div>
+
+              <div class="price-section col-3">
+                <div class="product-price">{{ `$${product.price}` }}</div>
+                <div class="quantity-control">
+                  <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)"
+                    style="font-size: 9px; padding: 2px;" />
+                  <div class="quantity">{{ product.quantity }}</div>
+                  <q-btn dense flat round icon="add" @click="increaseQuantity(product)"
+                    style="font-size: 9px; padding: 2px;" />
+                </div>
+                <div class="add-button">
+                  <q-btn v-if="!isInCart(product)" color="positive" @click="addToCart(product)">
+                    Añadir
+                  </q-btn>
+                  <q-btn v-else color="negative" @click="deleteFromCart(product)">
+                    Cancelar
+                  </q-btn>
+                </div>
+
+              </div>
+            </q-card-section>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+      <!-- SECCION -->
+      <!-- Carrito de Compras -->
+      <q-dialog v-model="cartVisible">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Carrito de Compras</div>
+          </q-card-section>
+
+          <q-card-section v-if="cart.length > 0">
+            <div v-for="item in cart" :key="item.id" class="q-mb-md">
+              <div>{{ item.name }} - {{ item.quantity }} x ${{ item.price }} = ${{ item.quantity * item.price }}</div>
+            </div>
+          </q-card-section>
+
+          <q-card-section v-else>
+            <div>El carrito está vacío</div>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cerrar" color="primary" @click="cartVisible = false" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <!-- Boton fotante para carrito -->
+      <q-page-sticky v-if="totalItems > 0" position="bottom-right" :offset="[18, 18]">
+        <!-- @click="showCart()" // Popup abajo -->
+        <!-- @click="cartVisible = true" // Popup en el medio -->
+        <q-btn fab color="positive" icon="shopping_cart" @click="cartVisible = true">
+          <q-badge floating color="red" text-color="white" :label="cantProduct" class="cart-badge"
+            v-if="cantProduct > 0" />
+        </q-btn>
+      </q-page-sticky>
+
+      <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+      <!-- SECCION: como pedir -->
+      <q-page-sticky v-if="totalItems == 0" position="bottom" :offset="[18, 18]">
+        <q-btn class="my-btn-como-pedir" color="accent" @click="comoPedirVisible = true">
+          <div class="flex justify-between" style="width: 100%; align-items: center;">
+            <span>¿como pedir?</span>
+            <div>
+              <q-icon name="help_outline" />
+            </div>
+          </div>
+        </q-btn>
+      </q-page-sticky>
+
+      <!-- Componente ComoPedirComponent -->
+      <ComoPedirComponent v-model="comoPedirVisible" />
+
     </div>
   </div>
 </template>
@@ -142,13 +117,16 @@ defineOptions({
 
 import { useQuasar } from 'quasar';
 import { ref, computed, onMounted } from 'vue';
+import ComoPedirComponent from '../../components/cart/dialog/ComoPedirComponent.vue';
 
 const cart = ref([]);
 const cartVisible = ref(false);
 const $q = useQuasar();
 const cantProduct = ref(0);
 const step = ref(4)
-const como_pedir = ref(false);
+const comoPedirVisible = ref(false);
+
+const categories = ref(["Pizzas", "Meriendas", "Tartas", "Ensaladas", "Postres"])
 
 // Array de productos
 const products = ref([
@@ -171,7 +149,7 @@ function increaseQuantity(product) {
   product.quantity++;
 }
 
-// Elimino del carrito
+// Añado del carrito
 function addToCart(product) {
   if (!isInCart(product)) {
     cart.value.push({ ...product, quantity: product.quantity });
@@ -234,7 +212,7 @@ const totalItems = computed(() => {
 <style>
 .my-card {
   width: 100%;
-  height: 100px;
+  height: 90px;
   max-width: 600px;
 }
 
@@ -327,7 +305,66 @@ const totalItems = computed(() => {
   /* Ajusta el tamaño de la letra */
 }
 
+.my-btn-como-pedir {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  max-width: 500px;
+  min-width: 150px;
+  padding: 10px;
+}
+
+/* Categorias */
+
+.category-slider {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 10px 0;
+  background-color: #ffffff;
+}
+
+.category-slider-sticky {
+  position: sticky;
+  top: 0;
+  /* La posición desde la cual se mantendrá fijo */
+  z-index: 1;
+  /* Asegúrate de que esté sobre otros elementos */
+  background-color: white;
+  /* Fondo para que se vea mejor al hacer scroll */
+  padding: 8px 0;
+  /* Añade algo de espacio */
+  border-bottom: 1px solid #e0e0e0;
+  /* Opcional, para separar visualmente */
+}
+
+.categories {
+  display: inline-flex;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.category-button {
+  background-color: #ff7043;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category-button:hover {
+  background-color: #ff5722;
+}
+
+
 @media (max-width: 600px) {
+
   /* .product-img {
     width: 100%;
     height: auto;
@@ -336,5 +373,9 @@ const totalItems = computed(() => {
   .price-section {
     display: block;
   } */
+  .category-slider {
+    justify-content: start;
+  }
+
 }
 </style>
