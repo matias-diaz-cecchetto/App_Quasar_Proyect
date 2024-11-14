@@ -2,13 +2,17 @@
   <div class="">
 
 
+    <!-- OTRA SECCION -->
+
+    <q-separator spaced />
+
     <!-- Lista de Productos -->
     <div class="col-xs-12 col-md-9">
-      <div class="row items-center justify-between">
-        <!-- <span class="text-h4">Carta</span> -->
+      <div class="row flex justify-center">
+        <span class="text-h4" style="font-size: 35px; font-weight: 500; line-height: 3rem; ">Menu</span>
       </div>
 
-      <q-separator spaced />
+      <!-- <q-separator spaced /> -->
 
       <q-list bordered class="rounded-borders" style="width: 100%; margin: 0 auto; border: none;">
         <!-- Iterar sobre categorías utilizando un objeto agrupador -->
@@ -124,8 +128,8 @@ const cart = ref([]);
 const cartVisible = ref(false);
 const $q = useQuasar();
 const cantProduct = ref(0);
-const step = ref(4)
 const comoPedirVisible = ref(false);
+
 const productos = ref([
   {
     id: 1,
@@ -403,10 +407,6 @@ const totalItems = computed(() => {
   margin: 0;
 }
 
-.quantity-control .q-btn {
-  font-size: 8px;
-}
-
 .quantity {
   font-size: 10px;
   margin: 0 4px;
@@ -452,15 +452,6 @@ const totalItems = computed(() => {
 }
 
 @media (max-width: 600px) {
-
-  /* .product-img {
-    width: 100%;
-    height: auto;
-  }
-
-  .price-section {
-    display: block;
-  } */
   .category-slider {
     justify-content: start;
   }
