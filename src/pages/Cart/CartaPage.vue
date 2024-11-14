@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="">
 
 
     <!-- Lista de Productos -->
@@ -8,51 +8,53 @@
         <!-- <span class="text-h4">Carta</span> -->
       </div>
 
-      <div class="category-slider category-slider-sticky">
-        <div class="categories" ref="categoryContainer">
-          <button v-for="category in categories" :key="category" class="category-button">
-            {{ category }}
-          </button>
-        </div>
-      </div>
-
       <q-separator spaced />
 
-      <div class="q-pa-md column items-center">
-        <q-card v-for="product in products" :key="product.id" class="my-card"
-          style="width: 100%; max-width: 600px; margin-bottom: 20px;">
-          <q-card-section horizontal class="my-card-section">
-            <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
+      <q-list bordered class="rounded-borders" style="width: 100%; margin: 0 auto; border: none;">
+        <!-- Iterar sobre categorías utilizando un objeto agrupador -->
+        <q-expansion-item v-for="(products, category) in groupedProducts" :key="category" group="categoryGroup"
+          :icon="getCategoryIcon(category)" :label="category" style="background-color: #F3F2F2; margin-top: 5px;">
+          <q-card style="  background-color: #fff;">
+            <q-card-section>
+              <div class="column items-center">
+                <q-card v-for="product in products" :key="product.id" class="my-card"
+                  style="width: 100%; max-width: 700px; margin-bottom: 20px; height: 120px;">
+                  <q-card-section horizontal class="my-card-section">
+                    <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
 
-            <q-card-section class="col-9 content-section row">
-              <div class="text-content col-9">
-                <div class="product-title">{{ product.name }}</div>
-                <div class="product-description">{{ product.description }}</div>
-              </div>
+                    <q-card-section class="col-9 content-section row">
+                      <div class="text-content col-9">
+                        <div class="product-title">{{ product.name }}</div>
+                        <div class="product-description">{{ product.description }}</div>
+                      </div>
 
-              <div class="price-section col-3">
-                <div class="product-price">{{ `$${product.price}` }}</div>
-                <div class="quantity-control">
-                  <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)"
-                    style="font-size: 9px; padding: 2px;" />
-                  <div class="quantity">{{ product.quantity }}</div>
-                  <q-btn dense flat round icon="add" @click="increaseQuantity(product)"
-                    style="font-size: 9px; padding: 2px;" />
-                </div>
-                <div class="add-button">
-                  <q-btn v-if="!isInCart(product)" color="positive" @click="addToCart(product)">
-                    Añadir
-                  </q-btn>
-                  <q-btn v-else color="negative" @click="deleteFromCart(product)">
-                    Cancelar
-                  </q-btn>
-                </div>
-
+                      <div class="price-section col-3">
+                        <div class="product-price">{{ `$${product.price}` }}</div>
+                        <div class="quantity-control">
+                          <q-btn dense flat round icon="remove" @click="decreaseQuantity(product)"
+                            style="font-size: 9px; padding: 2px;" />
+                          <div class="quantity">{{ product.quantity }}</div>
+                          <q-btn dense flat round icon="add" @click="increaseQuantity(product)"
+                            style="font-size: 9px; padding: 2px;" />
+                        </div>
+                        <div class="add-button">
+                          <q-btn class="btn-card" v-if="!isInCart(product)" color="positive"
+                            @click="addToCart(product)">
+                            Añadir
+                          </q-btn>
+                          <q-btn class="btn-card" v-else color="negative" @click="deleteFromCart(product)">
+                            Cancelar
+                          </q-btn>
+                        </div>
+                      </div>
+                    </q-card-section>
+                  </q-card-section>
+                </q-card>
               </div>
             </q-card-section>
-          </q-card-section>
-        </q-card>
-      </div>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
 
       <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
       <!-- SECCION -->
@@ -101,7 +103,6 @@
           </div>
         </q-btn>
       </q-page-sticky>
-
       <!-- Componente ComoPedirComponent -->
       <ComoPedirComponent v-model="comoPedirVisible" />
 
@@ -125,22 +126,156 @@ const $q = useQuasar();
 const cantProduct = ref(0);
 const step = ref(4)
 const comoPedirVisible = ref(false);
+const productos = ref([
+  {
+    id: 1,
+    categoria: {
+      tipo: 'Promociones',
+      icon: 'local_offer',
+    },
+    name: 'Promo 2 lomos',
+    description: 'Lomo, jamón cocido, queso, huevo, lechuga, tomate, mayonesa casera y papas fritas.',
+    price: 5000,
+    img: 'https://www.circuitogastronomico.com/wp-content/uploads/2023/04/pizzar-lomito-2.jpg',
+    quantity: 1
+  },
+  {
+    id: 2,
+    categoria: {
+      tipo: 'Hamburguesas',
+      icon: 'fastfood',
+    },
+    name: 'Hamburguesa completa',
+    description: 'Carne, queso, lechuga, tomate, huevo y papas fritas.',
+    price: 3200,
+    img: 'https://www.clarin.com/img/2022/05/27/0HXb0UR0v_2000x1500__1.jpg',
+    quantity: 1
+  },
+  {
+    id: 3,
+    categoria: {
+      tipo: 'Pizzas',
+      icon: 'local_pizza',
+    },
+    name: 'Pizza Napolitana',
+    description: 'Muzzarella, tomate fresco, orégano, y aceitunas.',
+    price: 2800,
+    img: 'https://irp-cdn.multiscreensite.com/0d51dde7/MOBILE/jpg/1977310-20190108_221129_%282%29.w1024.jpg',
+    quantity: 1
+  },
+  {
+    id: 4,
+    categoria: {
+      tipo: 'Pizzas',
+      icon: 'local_pizza',
+    },
+    name: 'Pizza Napolitana Especial',
+    description: 'Muzzarella, tomate fresco, orégano, y aceitunas.',
+    price: 2800,
+    img: 'https://media.airedesantafe.com.ar/p/82f11f560a16479049d198fef5f5b7cc/adjuntos/268/imagenes/003/775/0003775244/1200x675/smart/imagepng.png',
+    quantity: 1
+  },
+  {
+    id: 5,
+    categoria: { tipo: 'Platos Principales', icon: 'restaurant', },
+    name: 'Pollo al horno',
+    description: 'Pollo al horno rebosado con verduras.',
+    price: 1500,
+    img: 'https://www.coren.es/wp-content/uploads/2017/05/Tips-evitar-pollo-corral-seco.jpeg',
+    quantity: 1
+  },
+  {
+    id: 6,
+    categoria: { tipo: 'Sándwiches', icon: 'lunch_dining', },
+    name: 'Sándwich de milanesa',
+    description: 'Milanesa de carne, lechuga, tomate, y mayonesa.',
+    price: 2700,
+    img: 'https://resizer.glanacion.com/resizer/v2/milanesa-a-la-napolitana-con-guarnicion-de-papas-VLWFAANIWBGPFO4CSUHS7RYVVQ.jpg?auth=335fda04cf2733e39d11ca0ba979c1d0a8a55e6cdec15e4d5b00cfd59fbf9ed8&width=1280&height=854&quality=70&smart=true',
+    quantity: 1
+  },
+  {
+    id: 7,
+    categoria: {
+      tipo: 'Tartas',
+      icon: 'bakery_dining',
+    },
+    name: 'Tarta de Verdura',
+    description: 'Tarta casera de espinaca y queso.',
+    price: 2200,
+    img: 'https://cdn0.recetasgratis.net/es/posts/4/5/1/tarta_de_verduras_asadas_57154_orig.jpg',
+    quantity: 1
+  },
+  {
+    id: 8,
+    categoria: {
+      tipo: 'Tartas',
+      icon: 'bakery_dining',
+    },
+    name: 'Tarta de Manzana',
+    description: 'Tarta de manzana caramelizada con masa quebrada.',
+    price: 2100,
+    img: 'https://i0.wp.com/www.manualidadesapasos.com/wp-content/uploads/2020/04/receta-tarta-de-manzana.jpg?fit=800%2C534&ssl=1',
+    quantity: 1
+  },
+  {
+    id: 9,
+    categoria: {
+      tipo: 'Pasteles',
+      icon: 'cake',
+    },
 
-const categories = ref(["Pizzas", "Meriendas", "Tartas", "Ensaladas", "Postres"])
+    name: 'Pasteles de Carne',
+    description: 'Pasteles rellenos de carne, cebolla y especias.',
+    price: 1800,
+    img: 'https://www.clarin.com/img/2022/05/11/Hk09WmV7X_720x0__1.jpg',
+    quantity: 1
+  },
+  {
+    id: 10,
+    categoria: {
+      tipo: 'Pasteles',
+      icon: 'cake',
+    },
 
-// Array de productos
-const products = ref([
-  { id: 1, name: 'Promo 2 lomos', description: 'Lomo, jamón cocido, queso, huevo, lechuga, tomate, mayonesa casera y papas fritas.', price: 5000, img: 'https://www.circuitogastronomico.com/wp-content/uploads/2023/04/pizzar-lomito-2.jpg', quantity: 1 },
-  { id: 2, name: 'Hamburguesa completa', description: 'Carne, queso, lechuga, tomate, huevo y papas fritas.', price: 3200, img: 'https://www.clarin.com/img/2022/05/27/0HXb0UR0v_2000x1500__1.jpg', quantity: 1 },
-  { id: 3, name: 'Pizza Napolitana', description: 'Muzzarella, tomate fresco, orégano, y aceitunas.', price: 2800, img: 'https://irp-cdn.multiscreensite.com/0d51dde7/MOBILE/jpg/1977310-20190108_221129_%282%29.w1024.jpg', quantity: 1 },
-  { id: 4, name: 'Pollo al horno', description: 'Pollo al horno rebosado con verduras.', price: 1500, img: 'https://www.coren.es/wp-content/uploads/2017/05/Tips-evitar-pollo-corral-seco.jpeg', quantity: 1 },
-  { id: 5, name: 'Sándwich de milanesa', description: 'Milanesa de carne, lechuga, tomate, y mayonesa.', price: 2700, img: 'https://resizer.glanacion.com/resizer/v2/milanesa-a-la-napolitana-con-guarnicion-de-papas-VLWFAANIWBGPFO4CSUHS7RYVVQ.jpg?auth=335fda04cf2733e39d11ca0ba979c1d0a8a55e6cdec15e4d5b00cfd59fbf9ed8&width=1280&height=854&quality=70&smart=true', quantity: 1 },
-  { id: 6, name: 'Tarta de Verdura', description: 'Tarta casera de espinaca y queso.', price: 2200, img: 'https://cdn0.recetasgratis.net/es/posts/4/5/1/tarta_de_verduras_asadas_57154_orig.jpg', quantity: 1 },
-  { id: 7, name: 'Pasteles de Carne', description: 'Pasteles rellenas de carne, cebolla y especias.', price: 1800, img: 'https://www.clarin.com/img/2022/05/11/Hk09WmV7X_720x0__1.jpg', quantity: 1 },
-  { id: 8, name: 'Pastel de Papa', description: 'Pastel al horno con carne, puré de papa y gratinado.', price: 2500, img: 'https://media.lacapital.com.ar/p/a8535113ee273a29b3a46f4225b35df3/adjuntos/205/imagenes/018/078/0018078012/1200x675/smart/pastel-carne1jpg.jpg', quantity: 1 },
-  { id: 9, name: 'Ensalada Caesar', description: 'Lechuga, pollo, queso parmesano, crutones y aderezo Caesar.', price: 1900, img: 'https://comedera.com/wp-content/uploads/sites/9/2023/10/shutterstock_1087243763.jpg', quantity: 1 },
-  { id: 10, name: 'Tarta de Manzana', description: 'Tarta de manzana caramelizada con masa quebrada.', price: 2100, img: 'https://i0.wp.com/www.manualidadesapasos.com/wp-content/uploads/2020/04/receta-tarta-de-manzana.jpg?fit=800%2C534&ssl=1', quantity: 1 }
+    name: 'Pastel de Papa',
+    description: 'Pastel al horno con carne, puré de papa y gratinado.',
+    price: 2500,
+    img: 'https://media.lacapital.com.ar/p/a8535113ee273a29b3a46f4225b35df3/adjuntos/205/imagenes/018/078/0018078012/1200x675/smart/pastel-carne1jpg.jpg',
+    quantity: 1
+  },
+  {
+    id: 11,
+    categoria: {
+      tipo: 'Ensaladas',
+      icon: 'emoji_nature'
+    },
+    name: 'Ensalada Caesar',
+    description: 'Lechuga, pollo, queso parmesano, crutones y aderezo Caesar.',
+    price: 1900,
+    img: 'https://comedera.com/wp-content/uploads/sites/9/2023/10/shutterstock_1087243763.jpg',
+    quantity: 1
+  }
 ]);
+
+const groupedProducts = computed(() => {
+  return productos.value.reduce((acc, product) => {
+    const category = product.categoria.tipo; // Usamos solo el tipo de categoría
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {});
+});
+
+const getCategoryIcon = (category) => {
+  // Buscar la categoría en los productos
+  const categoryData = productos.value.find(product => product.categoria.tipo === category);
+
+  // Si encontramos la categoría, retornamos su icono, si no, un icono por defecto
+  return categoryData ? categoryData.categoria.icon : 'category';
+};
+
 
 function decreaseQuantity(product) {
   if (product.quantity > 1) product.quantity--;
@@ -158,9 +293,9 @@ function addToCart(product) {
 }
 // Elimino del carrito
 function deleteFromCart(product) {
-  cart.value = cart.value.filter(item => item.id !== product.id);
-  product.quantity = 1;
+  product.inCart = false;
   cantProduct.value--;
+  cart.value = cart.value.filter(item => item.id !== product.id);
 }
 // Verifica si el producto ya está en el carrito
 function isInCart(product) {
@@ -236,8 +371,7 @@ const totalItems = computed(() => {
 
 .product-title {
   font-size: 14px;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 10px 0px 10px 0px;
 }
 
 .product-description {
@@ -255,8 +389,9 @@ const totalItems = computed(() => {
 }
 
 .product-price {
+  margin-top: 10px;
   font-size: 12px;
-  margin-right: 8px;
+  margin-right: 9px;
 }
 
 /* Quantity control */
@@ -316,53 +451,6 @@ const totalItems = computed(() => {
   padding: 10px;
 }
 
-/* Categorias */
-
-.category-slider {
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 10px 0;
-  background-color: #ffffff;
-}
-
-.category-slider-sticky {
-  position: sticky;
-  top: 0;
-  /* La posición desde la cual se mantendrá fijo */
-  z-index: 1;
-  /* Asegúrate de que esté sobre otros elementos */
-  background-color: white;
-  /* Fondo para que se vea mejor al hacer scroll */
-  padding: 8px 0;
-  /* Añade algo de espacio */
-  border-bottom: 1px solid #e0e0e0;
-  /* Opcional, para separar visualmente */
-}
-
-.categories {
-  display: inline-flex;
-  gap: 10px;
-  padding: 0 10px;
-}
-
-.category-button {
-  background-color: #ff7043;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.category-button:hover {
-  background-color: #ff5722;
-}
-
-
 @media (max-width: 600px) {
 
   /* .product-img {
@@ -377,5 +465,8 @@ const totalItems = computed(() => {
     justify-content: start;
   }
 
+  .btn-card {
+    font-size: 8px !important;
+  }
 }
 </style>
