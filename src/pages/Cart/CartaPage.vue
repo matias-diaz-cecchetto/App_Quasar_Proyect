@@ -21,8 +21,7 @@
           <q-card style="  background-color: #fff;">
             <q-card-section>
               <div class="column items-center">
-                <q-card v-for="product in products" :key="product.id" class="my-card"
-                  style="width: 100%; max-width: 700px; margin-bottom: 20px; height: 120px;">
+                <q-card v-for="product in products" :key="product.id" class="my-card">
                   <q-card-section horizontal class="my-card-section">
                     <q-img class="col-3 product-img" :src="product.img" style="border-radius: 8px;" />
 
@@ -63,27 +62,9 @@
       <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
       <!-- SECCION -->
       <!-- Carrito de Compras -->
-      <q-dialog v-model="cartVisible">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Carrito de Compras</div>
-          </q-card-section>
 
-          <q-card-section v-if="cart.length > 0">
-            <div v-for="item in cart" :key="item.id" class="q-mb-md">
-              <div>{{ item.name }} - {{ item.quantity }} x ${{ item.price }} = ${{ item.quantity * item.price }}</div>
-            </div>
-          </q-card-section>
-
-          <q-card-section v-else>
-            <div>El carrito está vacío</div>
-          </q-card-section>
-
-          <q-card-actions align="right">
-            <q-btn flat label="Cerrar" color="primary" @click="cartVisible = false" />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
+      <CarritoCompraComponent :cart="cart" v-model:isVisible="cartVisible" @update:cart="updateCart"
+        @update:isVisible="cartVisible = $event" @cart-empty="handleCartEmpty" />
 
       <!-- Boton fotante para carrito -->
       <q-page-sticky v-if="totalItems > 0" position="bottom-right" :offset="[18, 18]">
@@ -123,13 +104,14 @@ defineOptions({
 import { useQuasar } from 'quasar';
 import { ref, computed, onMounted } from 'vue';
 import ComoPedirComponent from '../../components/cart/dialog/ComoPedirComponent.vue';
+import CarritoCompraComponent from '../../components/cart/carrito/CarritoCompraComponent.vue';
 
 const cart = ref([]);
 const cartVisible = ref(false);
 const $q = useQuasar();
 const cantProduct = ref(0);
 const comoPedirVisible = ref(false);
-
+const cartEmpty = ref(false); // Estado del carrito vacío
 const productos = ref([
   {
     id: 1,
@@ -310,6 +292,21 @@ const totalItems = computed(() => {
   return cart.value.reduce((sum, item) => sum + item.quantity, 0);
 });
 
+// Actualiza el carrito desde el hijo
+const updateCart = (newCart) => {
+  cart.value = newCart;
+};
+
+// Maneja el estado del carrito vacío
+const handleCartEmpty = () => {
+  cartEmpty.value = true; // Cambia el estado cuando el carrito está vacío
+};
+
+const removeFromCart = () => {
+  cart.value = [];
+  cartEmpty.value = true;
+};
+
 /* const showCart = () => {
   const totalItems = cart.value.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.value.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -351,8 +348,9 @@ const totalItems = computed(() => {
 <style>
 .my-card {
   width: 100%;
-  height: 90px;
-  max-width: 600px;
+  max-width: 1000px;
+  margin-bottom: 20px;
+  height: 120px;
 }
 
 .my-card-section {
