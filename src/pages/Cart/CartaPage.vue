@@ -4,7 +4,7 @@
 
     <!-- OTRA SECCION -->
 
-    <q-separator spaced />
+    <!--  <PortadaComponent /> -->
 
     <!-- Lista de Productos -->
     <div class="col-xs-12 col-md-9">
@@ -76,6 +76,25 @@
         </q-btn>
       </q-page-sticky>
 
+      <!-- Modal para completar datos -->
+      <q-dialog v-model="alert">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Alert</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum repellendus sit voluptate voluptas eveniet
+            porro. Rerum blanditiis perferendis totam, ea at omnis vel numquam exercitationem aut, natus minima, porro
+            labore.
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="OK" color="primary" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
       <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
       <!-- SECCION: como pedir -->
       <q-page-sticky v-if="totalItems == 0" position="bottom" :offset="[18, 18]">
@@ -105,6 +124,7 @@ import { useQuasar } from 'quasar';
 import { ref, computed, onMounted } from 'vue';
 import ComoPedirComponent from '../../components/cart/dialog/ComoPedirComponent.vue';
 import CarritoCompraComponent from '../../components/cart/carrito/CarritoCompraComponent.vue';
+// import PortadaComponent from '../../components/cart/portada/PortadaComponent.vue';
 
 const cart = ref([]);
 const cartVisible = ref(false);
@@ -299,6 +319,8 @@ const updateCart = (newCart) => {
 
 // Maneja el estado del carrito vacío
 const handleCartEmpty = () => {
+  cart.value = []; // Elimina todos los productos del carrito
+  cantProduct.value = 0; // Cantidad de productos 0
   cartEmpty.value = true; // Cambia el estado cuando el carrito está vacío
 };
 
@@ -346,6 +368,41 @@ const removeFromCart = () => {
 </script>
 
 <style>
+/*  Portada */
+.home-section {
+  /*background-color: var(--main-color);*/
+  position: relative;
+  overflow: hidden;
+}
+
+.home-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #000000;
+  opacity: 0.6;
+  z-index: -1;
+}
+
+/*clase de la oscuridad del home*/
+
+.home-section .home-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-image: url('../../mocks/img/portadaBar.jpg');
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+  animation: zoomInOut 20s ease infinite;
+}
+
 .my-card {
   width: 100%;
   max-width: 1000px;
@@ -373,7 +430,7 @@ const removeFromCart = () => {
 
 .product-title {
   font-size: 14px;
-  margin: 10px 0px 10px 0px;
+  margin: 5px 0px 10px 0px;
 }
 
 .product-description {
@@ -391,7 +448,7 @@ const removeFromCart = () => {
 }
 
 .product-price {
-  margin-top: 10px;
+  margin-top: 5px;
   font-size: 12px;
   margin-right: 9px;
 }

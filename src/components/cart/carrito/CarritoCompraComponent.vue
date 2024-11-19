@@ -1,13 +1,14 @@
 <template>
   <q-dialog v-model="carritoVisible">
-    <q-card class="cart-modal">
+    <q-card class="shadow-2 rounded-borders cart-modal">
       <!-- Encabezado con botones -->
       <div class="flex justify-between" style="height: 30px;">
         <q-card-actions align="left">
-          <q-btn flat icon="arrow_back" color="primary" @click="closeCart" />
+          <q-btn flat icon="arrow_back" color="primary" @click="closeCart" aria-label="Cerrar carrito" />
         </q-card-actions>
         <q-card-actions align="right">
-          <q-btn rounded icon="close" label="Anular pedido" class="my-btn-clear" @click="clearCart" />
+          <q-btn rounded icon="close" label="Anular pedido" class="my-btn-clear" @click="clearCart"
+            aria-label="Anular pedido" />
         </q-card-actions>
       </div>
 
@@ -15,6 +16,8 @@
       <q-card-section>
         <div class="text-h6">Mi pedido</div>
       </q-card-section>
+
+      <q-separator spaced />
 
       <!-- Contenido del carrito -->
       <q-card-section v-if="cart.length > 0" style="padding: 0px;">
@@ -36,6 +39,8 @@
         <div>El carrito está vacío</div>
       </q-card-section>
 
+      <q-separator spaced />
+
       <!-- Subtotal y Total -->
       <q-card class="subtotal-card">
         <q-card-section class="row">
@@ -47,8 +52,9 @@
           <div class="col-3 flex justify-end">${{ total }}</div>
         </q-card-section>
         <q-card-section class="flex justify-center">
-          <q-btn unelevated rounded label="Confirmar pedido" @click="confirmCart"
-            style="background: #fff; color: #774E0A;" />
+          <q-btn class="my-btn-confi" unelevated rounded :disable="cart.length === 0" label="Confirmar pedido"
+            @click="confirmCart" />
+
         </q-card-section>
       </q-card>
     </q-card>
@@ -69,8 +75,6 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["update:isVisible", "update:cart", "cart-empty"]);
-console.log(props.cart);
-
 const carritoVisible = ref(props.isVisible);
 
 // Sincroniza `carritoVisible` con `isVisible`
@@ -133,6 +137,8 @@ const total = computed(() => subtotal.value); // Si hay impuestos o descuentos, 
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
+  border-radius: 10px;
+  padding: 5px;
 }
 
 /* Estilos del cartel amarillo */
@@ -148,13 +154,18 @@ const total = computed(() => subtotal.value); // Si hay impuestos o descuentos, 
   padding: 15px;
 }
 
+.my-btn-confi {
+  background: #fff;
+  color: #774E0A;
+}
+
 /* Ajustes para pantallas pequeñas */
 @media (max-width: 600px) {
   .cart-modal {
     width: 100vw;
     max-width: 100vw;
     max-height: 100vh;
-    border-radius: 0;
+    border-radius: 10px;
   }
 
   .subtotal-card {
