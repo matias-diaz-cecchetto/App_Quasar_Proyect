@@ -24,8 +24,8 @@
         <div v-for="item in cart" :key="item.id" class="q-mb-md">
           <q-card-section class="row" style="padding-bottom: 0px; padding-top: 10px;">
             <div class="col-9">
-              <div class="text-h7">{{ item.name }}</div>
-              <div class="text-h7">x {{ item.quantity }}</div>
+              <div class="text-h7">({{ item.quantity }}) {{ item.name }}</div>
+              <!-- <div class="text-h7">x {{ item.quantity }}</div> -->
             </div>
             <div class="col-3 flex justify-end">
               ${{ item.price }}
@@ -111,11 +111,23 @@ const clearCart = () => {
 };
 
 function confirmCart() {
-  console.log('Pedido confirmado:', props.cart[0]);
-  console.log(`Subtotal: $${subtotal.value}`);
-  console.log(`Total: $${total.value}`);
-}
+  if (props.cart.length === 0) {
+    console.error('El carrito está vacío. No se puede confirmar el pedido.');
+    return;
+  }
 
+  const pedido = {
+    productos: props.cart.map((item) => ({
+      nombre: item.name,
+      cantidad: item.quantity,
+      precio: item.price,
+    })),
+    subtotal: subtotal.value,
+    total: total.value,
+  };
+
+  emit('confirmar-pedido', pedido);
+}
 // Cálculo del subtotal y total
 const subtotal = computed(() =>
   props.cart.reduce((acc, item) => acc + item.quantity * item.price, 0)

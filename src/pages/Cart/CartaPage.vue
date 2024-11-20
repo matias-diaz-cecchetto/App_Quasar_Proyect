@@ -9,7 +9,7 @@
     <!-- Lista de Productos -->
     <div class="col-xs-12 col-md-9">
       <div class="row flex justify-center">
-        <span class="text-h4" style="font-size: 35px; font-weight: 500; line-height: 3rem; ">Menu</span>
+        <span class="text-h4" style="font-size: 35px; font-weight: 500; line-height: 3rem; margin: 20px;">Menu</span>
       </div>
 
       <!-- <q-separator spaced /> -->
@@ -64,7 +64,7 @@
       <!-- Carrito de Compras -->
 
       <CarritoCompraComponent :cart="cart" v-model:isVisible="cartVisible" @update:cart="updateCart"
-        @update:isVisible="cartVisible = $event" @cart-empty="handleCartEmpty" />
+        @update:isVisible="cartVisible = $event" @cart-empty="handleCartEmpty" @confirmar-pedido="procesarPedido" />
 
       <!-- Boton fotante para carrito -->
       <q-page-sticky v-if="totalItems > 0" position="bottom-right" :offset="[18, 18]">
@@ -77,23 +77,44 @@
       </q-page-sticky>
 
       <!-- Modal para completar datos -->
-      <q-dialog v-model="alert">
-        <q-card>
+      <q-dialog v-model="formVisible">
+        <q-card style="width: 100%;">
           <q-card-section>
-            <div class="text-h6">Alert</div>
+            <div class="text-h6">Detalles del Pedido</div>
           </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum repellendus sit voluptate voluptas eveniet
-            porro. Rerum blanditiis perferendis totam, ea at omnis vel numquam exercitationem aut, natus minima, porro
-            labore.
+          <q-card-section>
+            <!-- Nombre completo -->
+            <q-input v-model="formData.nombre" label="Nombre completo" filled />
+
+            <!-- Tipo de entrega -->
+            <q-select v-model="formData.tipoEntrega" label="Tipo de entrega"
+              :options="['Retirar en local', 'Enviar a domicilio']" filled />
+
+            <!-- Dirección y otros datos (condicional) -->
+            <div v-if="formData.tipoEntrega === 'Enviar a domicilio'">
+              <q-input v-model="formData.direccion" label="Dirección" filled />
+              <q-input v-model="formData.numero" label="Número" type="number" filled />
+              <q-input v-model="formData.barrio" label="Barrio" filled />
+              <q-input v-model="formData.telefono" label="Teléfono" type="tel" filled />
+            </div>
+
+            <!-- Método de pago -->
+            <q-select v-model="formData.metodoPago" label="Método de pago"
+              :options="['Transferencia', 'Mercado Pago', 'Efectivo', 'Débito']" filled />
+
+            <!-- Indicaciones -->
+            <q-input v-model="formData.indicaciones" label="Indicaciones (opcional)" type="textarea" filled />
           </q-card-section>
 
+          <!-- Botones de acciones -->
           <q-card-actions align="right">
-            <q-btn flat label="OK" color="primary" v-close-popup />
+            <q-btn flat label="Cancelar" color="negative" @click="closeForm" />
+            <q-btn flat label="Confirmar" color="primary" @click="confirmForm" />
           </q-card-actions>
         </q-card>
       </q-dialog>
+
 
       <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
       <!-- SECCION: como pedir -->
@@ -132,6 +153,18 @@ const $q = useQuasar();
 const cantProduct = ref(0);
 const comoPedirVisible = ref(false);
 const cartEmpty = ref(false); // Estado del carrito vacío
+// Formulario de datos
+const formVisible = ref(false);
+const formData = ref({
+  nombre: '',
+  tipoEntrega: '',
+  direccion: '',
+  numero: '',
+  barrio: '',
+  telefono: '',
+  metodoPago: '',
+  indicaciones: '',
+});
 const productos = ref([
   {
     id: 1,
@@ -329,42 +362,23 @@ const removeFromCart = () => {
   cartEmpty.value = true;
 };
 
-/* const showCart = () => {
-  const totalItems = cart.value.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cart.value.reduce((sum, item) => sum + item.quantity * item.price, 0);
+function procesarPedido(pedido) {
+  console.log('Pedido recibido desde el hijo:', pedido);
+  cartVisible.value = false;
+  formVisible.value = true;
+  // Aquí puedes guardar los datos en una base de datos, mostrar una confirmación, etc.
+}
 
-  const message = `
-    <div style="padding: 16px;">
-      <h6>Carrito (${totalItems} artículos)</h6>
-      ${cart.value.map(item => `
-        <div style="display: flex; justify-content: space-between; margin: 4px 0;">
-          <span>${item.name}</span>
-          <span>${item.quantity} x $${item.price} = $${item.quantity * item.price}</span>
-        </div>
-      `).join('')}
-      <hr>
-      <strong>Total: $${totalPrice}</strong>
-    </div>
-  `;
+// Formulario
 
-  $q.bottomSheet({
-    message: message,
-    actions: [
-      { label: "Finalizar Compra", color: "positive", icon: "shopping_cart", id: "checkout" },
-      { label: "Cancelar", color: "negative", icon: "cancel", id: "cancel" }
-    ]
-  })
-    .onOk(action => {
-      if (action.id === "checkout") {
-        console.log("Procesando compra...");
-      }
-    })
-    .onCancel(() => console.log("Carrito cancelado"))
-    .onDismiss(() => console.log("Se cerró el BottomSheet"));
-}; */
+const closeForm = () => {
+  formVisible.value = false;
+};
 
-
-
+const confirmForm = () => {
+  console.log('Datos del formulario:', formData.value);
+  closeForm();
+};
 </script>
 
 <style>
